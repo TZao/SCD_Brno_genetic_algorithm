@@ -8,7 +8,7 @@ trait MutationLike extends (ChromosomeLike => ChromosomeLike)
 trait CrossoverLike extends ((ChromosomeLike, ChromosomeLike) => (ChromosomeLike, ChromosomeLike))
 
 trait ChromosomeLike {
-  val genes: Seq[Int]
+  val genes: Seq[Int] // bits LSB => MSB
   def value: Int
 }
 
@@ -81,11 +81,11 @@ object Main {
   def main(args: Array[String]) {
     var population = new Population(
       for (i <- 1 to 10) yield new Chromosome( // number of chromosomes in population
-        for (j <- 1 to 8) yield Random.nextInt(2))) // number of genes in chromosome
-
-    for (i <- 1 to 100) {
-      population = population.nextPopulation(new Crossover, new Mutation, new Fitness)
-    }
-    println(population.best(new Fitness).value)
+        for (j <- 1 to 8) yield Random.nextInt(2))) // number of genes in chromosome 
+                                                                                         
+    for (i <- 1 to 100) { // number of populations                                        
+      population = population.nextPopulation(new Crossover, new Mutation, new Fitness)   
+    }                                                                                    
+    println(population.best(new Fitness).value) // should be close to 255 (2^8 - 1)
   }
 }
