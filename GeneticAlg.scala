@@ -3,6 +3,10 @@ package com.czechscala.blank
 import scala.util.Random
 import scala.annotation.tailrec
 
+trait FitnessLike extends (ChromosomeLike => Double)
+trait MutationLike extends (ChromosomeLike => ChromosomeLike)
+trait CrossoverLike extends ((ChromosomeLike, ChromosomeLike) => (ChromosomeLike, ChromosomeLike))
+
 trait ChromosomeLike {
   val genes: Seq[Int]
   def value: Int
@@ -13,10 +17,6 @@ trait PopulationLike {
   def best(fitness: FitnessLike): ChromosomeLike
   def nextPopulation(crossover: CrossoverLike, mutation: MutationLike, fitness: FitnessLike): Population
 }
-
-trait FitnessLike extends (ChromosomeLike => Double)
-trait MutationLike extends (ChromosomeLike => ChromosomeLike)
-trait CrossoverLike extends ((ChromosomeLike, ChromosomeLike) => (ChromosomeLike, ChromosomeLike))
 
 class Chromosome(val genes: Seq[Int]) extends ChromosomeLike {
   override def value =
@@ -52,6 +52,7 @@ class Fitness extends FitnessLike {
   }
 }
 
+// cross two chromosomes on random index (assumed chromosomes are same length)
 class Crossover extends CrossoverLike {
   def apply(x: ChromosomeLike, y: ChromosomeLike) = {
     val crossPoint = Random.nextInt(x.genes.length);
@@ -64,6 +65,7 @@ class Crossover extends CrossoverLike {
   }
 }
 
+// Switch one random gene in chromosome from 1 to 0 or vice versa
 class Mutation extends MutationLike {
   override def apply(x: ChromosomeLike) = {
     val mutateIdx = Random.nextInt(x.genes.length)
@@ -73,11 +75,13 @@ class Mutation extends MutationLike {
   }
 }
 
+/* MAIN */
+// http://www.obitko.com/tutorials/genetic-algorithms/index.php
 object Main {
   def main(args: Array[String]) {
     var population = new Population(
-      for (i <- 1 to 10) yield new Chromosome(
-        for (j <- 1 to 8) yield Random.nextInt(2)))
+      for (i <- 1 to 10) yield new Chromosome( // number of chromosomes in population
+        for (j <- 1 to 8) yield Random.nextInt(2))) // number of genes in chromosome
 
     for (i <- 1 to 100) {
       population = population.nextPopulation(new Crossover, new Mutation, new Fitness)
