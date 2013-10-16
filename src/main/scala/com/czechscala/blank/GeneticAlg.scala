@@ -1,6 +1,7 @@
 package com.czechscala.blank
 
 import scala.util.Random
+import scala.annotation.tailrec
 
 trait ChromosomeLike {
   val genes: Seq[Int]
@@ -13,17 +14,9 @@ trait PopulationLike {
   def nextPopulation(crossover: CrossoverLike, mutation: MutationLike, fitness: FitnessLike): Population
 }
 
-trait FitnessLike {
-  def apply(chromosome: ChromosomeLike): Double
-}
-
-trait MutationLike {
-  def apply(x: ChromosomeLike): ChromosomeLike
-}
-
-trait CrossoverLike {
-  def apply(x: ChromosomeLike)(y: ChromosomeLike): (ChromosomeLike, ChromosomeLike)
-}
+trait FitnessLike extends (ChromosomeLike => Double)
+trait MutationLike extends (ChromosomeLike => ChromosomeLike)
+trait CrossoverLike extends ((ChromosomeLike, ChromosomeLike) => (ChromosomeLike, ChromosomeLike))
 
 class Chromosome(val genes: Seq[Int]) extends ChromosomeLike {
   override def value =
@@ -40,6 +33,7 @@ class Population(val chromosomes: Seq[ChromosomeLike]) extends PopulationLike {
       else best)
 
   override def nextPopulation(crossover: CrossoverLike, mutation: MutationLike, fitness: FitnessLike) = {
+    @tailrec
     def selection(sum: Int, ch: Seq[ChromosomeLike], r: Int): ChromosomeLike = {
       val s = sum + fitness(ch.head).toInt
       if (s > r) ch.head
@@ -59,7 +53,7 @@ class Fitness extends FitnessLike {
 }
 
 class Crossover extends CrossoverLike {
-  def apply(x: ChromosomeLike)(y: ChromosomeLike) = {
+  def apply(x: ChromosomeLike, y: ChromosomeLike) = {
     val crossPoint = Random.nextInt(x.genes.length);
     def cross(x: ChromosomeLike, y: ChromosomeLike) = {
       new Chromosome(
