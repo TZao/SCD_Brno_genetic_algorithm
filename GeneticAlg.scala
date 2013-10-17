@@ -86,6 +86,6 @@ object Main {
     for (i <- 1 to 100) { // number of populations                                        
       population = population.nextPopulation(new Crossover, new Mutation, new Fitness)   
     }                                                                                    
-    println(population.best(new Fitness).value) // should be close to 255 (2^8 - 1)
+    println(population.best(new Fitness).value) // should be close to 255 (2^8)
   }
 }
